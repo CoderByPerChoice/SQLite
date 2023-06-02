@@ -7,6 +7,11 @@ function sqlite3dbapi() {
       "TODOs.db",
       sqlite3.OPEN_READWRITE
     );
+    // const databaseObj = new sqlite3.Database(
+    //   ":memory:",
+    //   sqlite3.OPEN_READWRITE
+    // );
+
     return databaseObj;
   }
 

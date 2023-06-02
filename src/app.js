@@ -1,14 +1,22 @@
 const express = require("express");
+const path = require("path");
 //const db = new sqlite3.Database(":memory:");
 const sqlite3dbapi = require("../data/sqlite3dbapi");
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 8080;
 app.use(express.json());
 
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
+
 app.get("/", function (req, res) {
-  res.send(
-    "INFO - This is my attempt to create REST API between NODEJS and SQLITE!"
-  );
+  // res.send(
+  //   "INFO - This is my attempt to create REST API between NODEJS and SQLITE!"
+  // );
+  res.render("index", {
+    title: "NodeJS API",
+    message: "Welcome to my SQLite and NodeJS integration application.",
+  });
 });
 
 app.get("/gettodos", async function (req, res) {
@@ -43,7 +51,7 @@ app.post("/addtodo", async (req, res, next) => {
 });
 
 //Delete action.
-app.post("/deletetodo", async (req, res, next) => {
+app.delete("/deletetodo", async (req, res, next) => {
   const todoid = req.body.todoid;
   let result = await sqlite3dbapi.deleteTODO(todoid);
   console.log("result -> " + result);
@@ -54,7 +62,7 @@ app.post("/deletetodo", async (req, res, next) => {
 });
 
 //Update action.
-app.post("/updatetodo", async (req, res, next) => {
+app.put("/updatetodo", async (req, res, next) => {
   const todoid = req.body.todoid;
   const todovalue = req.body.todovalue;
   let result = await sqlite3dbapi.updateTODO(todoid, todovalue);
