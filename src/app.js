@@ -26,7 +26,7 @@ app.get("/gettodos", async function (req, res) {
   //   let array = ["Apple", "Orange", "Cherry", "Blueberry"];
 
   //   console.log(JSON.parse(JSON.stringify(array)));
-  res.status(200).send(JSON.stringify(todos));
+  res.status(200).send(todos);
 });
 
 //Create DB action.
