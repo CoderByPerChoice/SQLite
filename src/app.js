@@ -51,7 +51,7 @@ app.post("/addtodo", async (req, res, next) => {
 });
 
 //Delete action.
-app.delete("/deletetodo", async (req, res, next) => {
+app.post("/deletetodo", async (req, res, next) => {
   const todoid = req.body.todoid;
   let result = await sqlite3dbapi.deleteTODO(todoid);
   console.log("result -> " + result);
