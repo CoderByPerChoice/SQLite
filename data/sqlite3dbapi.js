@@ -127,6 +127,71 @@ function sqlite3dbapi() {
     });
   }
 
+  /**
+   * @swagger
+   * components:
+   *   schemas:
+   *     ToDos:
+   *       type: object
+   *       required:
+   *         - id
+   *         - title
+   *       properties:
+   *         id:
+   *           type: string
+   *           description: The auto-generated id of the ToDo
+   *         title:
+   *           type: string
+   *           description: ToDo title
+   *       example:
+   *         ["3: Mastering Update","5: Mastering ExpressJS"]
+   */
+
+  /**
+   * @swagger
+   * tags:
+   *   name: ToDos
+   *   description: The ToDos managing API
+   */
+
+  /**
+   * @swagger
+   * /gettodos:
+   *   get:
+   *     summary: Returns the list of all ToDos
+   *     tags: [ToDos]
+   *     responses:
+   *       200:
+   *         description: The list of the ToDos
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   */
+
+  /**
+   * @swagger
+   * /addtodo:
+   *   post:
+   *     summary: Create a new ToDo
+   *     tags: [ToDos]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/ToDos'
+   *     responses:
+   *       201:
+   *         description: The ToDo was successfully created
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ToDos'
+   *       500:
+   *         description: Some server error
+   */
+
   return {
     getAllTODOs,
     createDB,
