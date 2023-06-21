@@ -48,12 +48,9 @@ app.get("/", function (req, res) {
 
 app.get("/gettodos", async function (req, res) {
   let todos = await sqlite3dbapi.getAllTODOs();
-  console.log(todos);
-  //   //JSON.parse(todos);
-  //   let array = ["Apple", "Orange", "Cherry", "Blueberry"];
-
-  //   console.log(JSON.parse(JSON.stringify(array)));
-  res.status(200).send(todos);
+  //let content = await convertArrayToJson(todos);
+  todos = '{"todos": [' + todos + "]}";
+  res.status(200).send(JSON.parse(todos));
 });
 
 //Create DB action.

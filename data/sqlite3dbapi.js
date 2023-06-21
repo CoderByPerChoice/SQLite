@@ -20,11 +20,32 @@ function sqlite3dbapi() {
       try {
         const db = getDBRefObj();
         let todos = [];
+
         db.serialize(() => {
           db.each("SELECT rowid AS id, task FROM TODO", (err, row) => {
-            todos.push(row.id + ": " + row.task);
+            //todos.push(row.id + ": " + row.task);
+            let placeholder =
+              '{"id":"' + row.id + '","todo":"' + row.task + '"}';
+            todos.push(placeholder);
             resolve(todos);
           });
+          // let sql = `SELECT rowid AS id, task FROM TODO`;
+          // db.all(sql, [], (err, rows) => {
+          //   if (err) {
+          //     throw err;
+          //   }
+          //   rows.forEach((row) => {
+          //     text += text.replace(
+          //       "placeholder",
+          //       `{ "id":"${row.id}" , "todo":"${row.task}" },placeholder`
+          //     );
+          //     console.log(text);
+          //     // console.log(row.name);
+          //     //todos.push(row.id + ": " + row.task);
+          //     //resolve(todos);
+          //     resolve(text);
+          //   });
+          // });
         });
         db.close();
       } catch (error) {
@@ -135,16 +156,16 @@ function sqlite3dbapi() {
    *       type: object
    *       required:
    *         - id
-   *         - title
+   *         - task
    *       properties:
    *         id:
-   *           type: string
+   *           type: number
    *           description: The auto-generated id of the ToDo
-   *         title:
+   *         task:
    *           type: string
-   *           description: ToDo title
+   *           description: ToDo task
    *       example:
-   *         ["3: Mastering Update","5: Mastering ExpressJS"]
+   *         {"todos":[{"id":"3","todo":"Mastering Update"}]}
    */
 
   /**
@@ -166,7 +187,7 @@ function sqlite3dbapi() {
    *         content:
    *           application/json:
    *             schema:
-   *               type: array
+   *               type: json
    */
 
   /**
