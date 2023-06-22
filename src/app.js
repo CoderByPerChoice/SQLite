@@ -69,7 +69,9 @@ app.post("/addtodo", async (req, res, next) => {
   let result = await sqlite3dbapi.insertTODO(todovalue);
   console.log("result -> " + result);
   if (result === "SUCCESS") {
-    res.status(201).send("Insert operation succeeded!");
+    res.status(201).send(JSON.parse('{"msg":"Insert operation succeeded!"}'));
+  } else {
+    res.status(500).send(JSON.parse('{"msg":"Some exception have occurred."}'));
   }
   next();
 });
@@ -80,7 +82,9 @@ app.post("/deletetodo", async (req, res, next) => {
   let result = await sqlite3dbapi.deleteTODO(todoid);
   console.log("result -> " + result);
   if (result === "SUCCESS") {
-    res.status(200).send("Delete operation succeeded!");
+    res.status(201).send(JSON.parse('{"msg":"Delete operation succeeded!"}'));
+  } else {
+    res.status(500).send(JSON.parse('{"msg":"Some exception have occurred."}'));
   }
   next();
 });
@@ -92,7 +96,9 @@ app.put("/updatetodo", async (req, res, next) => {
   let result = await sqlite3dbapi.updateTODO(todoid, todovalue);
   console.log("result -> " + result);
   if (result === "SUCCESS") {
-    res.status(200).send("Update operation succeeded!");
+    res.status(201).send(JSON.parse('{"msg":"Update operation succeeded!"}'));
+  } else {
+    res.status(500).send(JSON.parse('{"msg":"Some exception have occurred."}'));
   }
   next();
 });

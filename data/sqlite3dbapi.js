@@ -29,23 +29,6 @@ function sqlite3dbapi() {
             todos.push(placeholder);
             resolve(todos);
           });
-          // let sql = `SELECT rowid AS id, task FROM TODO`;
-          // db.all(sql, [], (err, rows) => {
-          //   if (err) {
-          //     throw err;
-          //   }
-          //   rows.forEach((row) => {
-          //     text += text.replace(
-          //       "placeholder",
-          //       `{ "id":"${row.id}" , "todo":"${row.task}" },placeholder`
-          //     );
-          //     console.log(text);
-          //     // console.log(row.name);
-          //     //todos.push(row.id + ": " + row.task);
-          //     //resolve(todos);
-          //     resolve(text);
-          //   });
-          // });
         });
         db.close();
       } catch (error) {
@@ -62,15 +45,6 @@ function sqlite3dbapi() {
         const db = getDBRefObj();
         db.serialize(() => {
           db.run("CREATE TABLE TODO (task TEXT)");
-          // db.all("", [], (err, rows) => {
-          //     rows
-          // })
-          //   const stmt = db.prepare("INSERT INTO TODO VALUES (?)");
-          //   for (let i = 0; i < 10; i++) {
-          //     stmt.run("Ipsum " + i);
-          //   }
-          //   stmt.finalize();
-
           db.each("SELECT rowid AS id, task FROM TODO", (err, row) => {
             console.log(row.id + ": " + row.task);
           });
@@ -88,15 +62,19 @@ function sqlite3dbapi() {
       try {
         const db = getDBRefObj();
         db.serialize(() => {
-          const stmt = db.prepare("INSERT INTO TODO VALUES (?)");
-          stmt.run(todovalue);
-          stmt.finalize();
+          try {
+            const stmt = db.prepare("INSERT INTO TODO VALUES (?)");
+            stmt.run(todovalue);
+            stmt.finalize();
 
-          db.each("SELECT rowid AS id, task FROM TODO", (err, row) => {
-            console.log(row.id + ": " + row.task);
-          });
-          resolve("SUCCESS");
-          db.close();
+            db.each("SELECT rowid AS id, task FROM TODO", (err, row) => {
+              console.log(row.id + ": " + row.task);
+            });
+            resolve("SUCCESS");
+            db.close();
+          } catch (error) {
+            reject(error);
+          }
         });
       } catch (error) {
         reject(error);
