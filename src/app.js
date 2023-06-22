@@ -49,7 +49,7 @@ app.get("/", function (req, res) {
 app.get("/gettodos", async function (req, res) {
   let todos = await sqlite3dbapi.getAllTODOs();
   //let content = await convertArrayToJson(todos);
-  todos = '{"todos": [' + todos + "]}";
+  todos = "[" + todos + "]";
   res.status(200).send(JSON.parse(todos));
 });
 
