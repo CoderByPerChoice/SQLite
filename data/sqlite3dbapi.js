@@ -38,7 +38,96 @@ function sqlite3dbapi() {
     });
   }
 
-  function createDB() {
+  function getAllWebHookDetails() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const db = getDBRefObj();
+        let webhookdetails = [];
+
+        db.serialize(() => {
+          db.each(
+            "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails",
+            (err, row) => {
+              let placeholder =
+                '{"id":"' +
+                row.id +
+                '","eventname":"' +
+                row.eventname +
+                '","endpointurl":"' +
+                row.endpointurl +
+                '"}';
+              webhookdetails.push(placeholder);
+              resolve(webhookdetails);
+            }
+          );
+        });
+        db.close();
+      } catch (error) {
+        reject(error);
+      } finally {
+      }
+    });
+  }
+
+  function addWebHookDetails(eventname, endpointurl) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const db = getDBRefObj();
+        db.serialize(() => {
+          try {
+            const stmt = db.prepare("INSERT INTO WebHookDetails VALUES (?,?)");
+            stmt.run(eventname, endpointurl);
+            stmt.finalize();
+
+            db.each(
+              "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails",
+              (err, row) => {
+                console.log(
+                  row.id + ": " + row.eventname + ": " + row.endpointurl
+                );
+              }
+            );
+            resolve("SUCCESS");
+            db.close();
+          } catch (error) {
+            reject(error);
+          }
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  function deleteWebHook(endpointurl) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const db = getDBRefObj();
+        db.serialize(() => {
+          const stmt = db.prepare(
+            "DELETE FROM WebHookDetails where endpointurl = (?)"
+          );
+          stmt.run([endpointurl]);
+          stmt.finalize();
+
+          db.each(
+            "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails",
+            (err, row) => {
+              console.log(
+                row.id + ": " + row.eventname + ": " + row.endpointurl
+              );
+            }
+          );
+          resolve("SUCCESS");
+          db.close();
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  function createToDotable() {
     return new Promise(async (resolve, reject) => {
       try {
         //const db = new sqlite3.Database("Employees.db");
@@ -48,6 +137,28 @@ function sqlite3dbapi() {
           db.each("SELECT rowid AS id, task FROM TODO", (err, row) => {
             console.log(row.id + ": " + row.task);
           });
+          resolve("SUCCESS");
+          db.close();
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  function createWebHookDetailsTable() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        //const db = new sqlite3.Database("Employees.db");
+        const db = getDBRefObj();
+        db.serialize(() => {
+          db.run("CREATE TABLE WebHookDetails (eventname TEXT, endpointurl)");
+          db.each(
+            "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails",
+            (err, row) => {
+              console.log(row.id + ": " + row.task);
+            }
+          );
           resolve("SUCCESS");
           db.close();
         });
@@ -193,10 +304,14 @@ function sqlite3dbapi() {
 
   return {
     getAllTODOs,
-    createDB,
+    createToDotable,
+    createWebHookDetailsTable,
     insertTODO,
     deleteTODO,
     updateTODO,
+    addWebHookDetails,
+    getAllWebHookDetails,
+    deleteWebHook,
   };
 }
 

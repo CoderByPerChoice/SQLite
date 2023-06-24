@@ -53,13 +53,67 @@ app.get("/gettodos", async function (req, res) {
   res.status(200).send(JSON.parse(todos));
 });
 
-//Create DB action.
-app.post("/createdb", async function (req, res, next) {
-  let result = await sqlite3dbapi.createDB();
+//Create ToDo table action.
+app.post("/createtodotable", async function (req, res, next) {
+  let result = await sqlite3dbapi.createToDotable();
   if (result === "SUCCESS") {
-    res.status(201).send("database successfully created!");
+    res.status(201).send("ToDo table successfully created!");
   }
   next();
+});
+
+//Create Webhook details table action.
+app.post("/createwebhookdetailstable", async function (req, res, next) {
+  let result = await sqlite3dbapi.createWebHookDetailsTable();
+  if (result === "SUCCESS") {
+    res.status(201).send("Webhookdetails table successfully created!");
+  }
+  next();
+});
+
+//Register WebHook Events.
+app.post("/registernewtodowebhookevent", async (req, res, next) => {
+  console.log("Request Body -> " + req.body);
+  //const eventname = req.body.eventname;
+  const endpointurl = req.body.endpointurl;
+  //console.log(loremvalue);
+  let result = await sqlite3dbapi.addWebHookDetails(
+    "NEWTODOADDED",
+    endpointurl
+  );
+  console.log("result -> " + result);
+  if (result === "SUCCESS") {
+    res
+      .status(201)
+      .send(JSON.parse('{"msg":"WebHook Event added succeeded!"}'));
+  } else {
+    res.status(500).send(JSON.parse('{"msg":"Some exception have occurred."}'));
+  }
+  next();
+});
+
+//Deregister WebHook Events.
+app.post("/deregisternewtodowebhookevent", async (req, res, next) => {
+  console.log("Request Body -> " + req.body);
+  //const eventname = req.body.eventname;
+  const endpointurl = req.body.endpointurl;
+  //console.log(loremvalue);
+  let result = await sqlite3dbapi.deleteWebHook(endpointurl);
+  console.log("result -> " + result);
+  if (result === "SUCCESS") {
+    res
+      .status(201)
+      .send(JSON.parse('{"msg":"WebHook Event deregistered succeeded!"}'));
+  } else {
+    res.status(500).send(JSON.parse('{"msg":"Some exception have occurred."}'));
+  }
+  next();
+});
+
+app.get("/getwebhookevents", async function (req, res) {
+  let webhookevents = await sqlite3dbapi.getAllWebHookDetails();
+  webhookevents = "[" + webhookevents + "]";
+  res.status(200).send(JSON.parse(webhookevents));
 });
 
 //Insert action.
