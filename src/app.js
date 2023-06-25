@@ -144,7 +144,7 @@ app.post("/registerdeletetodowebhookevent", async (req, res, next) => {
 });
 
 //Deregister New ToDo WebHook Events.
-app.post("/deregisterwebhookevent", async (req, res, next) => {
+app.delete("/deregisterwebhookevent", async (req, res, next) => {
   //console.log("Request Body -> " + req.body);
   const webhookid = req.query.webhookid;
   //const eventname = req.body.eventname;
