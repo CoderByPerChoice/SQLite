@@ -1,4 +1,5 @@
 const sqlite3 = require("sqlite3").verbose();
+const fetch = require("node-fetch");
 
 function sqlite3dbapi() {
   //Get DB Reference Object.
@@ -178,9 +179,30 @@ function sqlite3dbapi() {
             stmt.run(todovalue);
             stmt.finalize();
 
-            db.each("SELECT rowid AS id, task FROM TODO", (err, row) => {
-              console.log(row.id + ": " + row.task);
-            });
+            // db.each("SELECT rowid AS id, task FROM TODO", (err, row) => {
+            //   console.log(row.id + ": " + row.task);
+            // });
+            db.each(
+              "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails where eventname = 'NEWTODOADDED'",
+              async (err, row) => {
+                // console.log(
+                //   row.id + ": " + row.eventname + ": " + row.endpointurl
+                // );
+                try {
+                  const body = { todovalue: todovalue };
+                  const response = await fetch(row.endpointurl, {
+                    method: "POST",
+                    body: JSON.stringify(body),
+                    //body: { msg: todovalue },
+                    headers: { "Content-Type": "application/json" },
+                  });
+                  const data = await response;
+                  console.log(data);
+                } catch (error) {
+                  console.log(error);
+                }
+              }
+            );
             resolve("SUCCESS");
             db.close();
           } catch (error) {
@@ -202,9 +224,23 @@ function sqlite3dbapi() {
           stmt.run([todoid]);
           stmt.finalize();
 
-          db.each("SELECT rowid AS id, task FROM TODO", (err, row) => {
-            console.log(row.id + ": " + row.task);
-          });
+          db.each(
+            "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails where eventname = 'TODODELETED'",
+            async (err, row) => {
+              try {
+                const body = { todoid: todoid };
+                const response = await fetch(row.endpointurl, {
+                  method: "POST",
+                  body: JSON.stringify(body),
+                  headers: { "Content-Type": "application/json" },
+                });
+                const data = await response;
+                console.log(data);
+              } catch (error) {
+                console.log(error);
+              }
+            }
+          );
           resolve("SUCCESS");
           db.close();
         });
@@ -225,9 +261,24 @@ function sqlite3dbapi() {
           stmt.run([todovalue, todoid]);
           stmt.finalize();
 
-          db.each("SELECT rowid AS id, task FROM TODO", (err, row) => {
-            console.log(row.id + ": " + row.task);
-          });
+          db.each(
+            "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails where eventname = 'TODOUPDATED'",
+            async (err, row) => {
+              try {
+                const body = { todoid: todoid, todovalue: todovalue };
+                const response = await fetch(row.endpointurl, {
+                  method: "POST",
+                  body: JSON.stringify(body),
+                  //body: { msg: todovalue },
+                  headers: { "Content-Type": "application/json" },
+                });
+                const data = await response;
+                console.log(data);
+              } catch (error) {
+                console.log(error);
+              }
+            }
+          );
           resolve("SUCCESS");
           db.close();
         });

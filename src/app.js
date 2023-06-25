@@ -73,7 +73,7 @@ app.post("/createwebhookdetailstable", async function (req, res, next) {
 
 //Register WebHook Events.
 app.post("/registernewtodowebhookevent", async (req, res, next) => {
-  console.log("Request Body -> " + req.body);
+  //console.log("Request Body -> " + req);
   //const eventname = req.body.eventname;
   const endpointurl = req.body.endpointurl;
   //console.log(loremvalue);
@@ -81,6 +81,42 @@ app.post("/registernewtodowebhookevent", async (req, res, next) => {
     "NEWTODOADDED",
     endpointurl
   );
+  console.log("result -> " + result);
+  if (result === "SUCCESS") {
+    res
+      .status(201)
+      .send(JSON.parse('{"msg":"WebHook Event added succeeded!"}'));
+  } else {
+    res.status(500).send(JSON.parse('{"msg":"Some exception have occurred."}'));
+  }
+  next();
+});
+
+//Register WebHook Events.
+app.post("/registerupdatetodowebhookevent", async (req, res, next) => {
+  //console.log("Request Body -> " + req);
+  //const eventname = req.body.eventname;
+  const endpointurl = req.body.endpointurl;
+  //console.log(loremvalue);
+  let result = await sqlite3dbapi.addWebHookDetails("TODOUPDATED", endpointurl);
+  console.log("result -> " + result);
+  if (result === "SUCCESS") {
+    res
+      .status(201)
+      .send(JSON.parse('{"msg":"WebHook Event added succeeded!"}'));
+  } else {
+    res.status(500).send(JSON.parse('{"msg":"Some exception have occurred."}'));
+  }
+  next();
+});
+
+//Register WebHook Events.
+app.post("/registerdeletetodowebhookevent", async (req, res, next) => {
+  //console.log("Request Body -> " + req);
+  //const eventname = req.body.eventname;
+  const endpointurl = req.body.endpointurl;
+  //console.log(loremvalue);
+  let result = await sqlite3dbapi.addWebHookDetails("TODODELETED", endpointurl);
   console.log("result -> " + result);
   if (result === "SUCCESS") {
     res
