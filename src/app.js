@@ -71,7 +71,7 @@ app.post("/createwebhookdetailstable", async function (req, res, next) {
   next();
 });
 
-//Register WebHook Events.
+//Register New ToDo WebHook Events.
 app.post("/registernewtodowebhookevent", async (req, res, next) => {
   //console.log("Request Body -> " + req);
   //const eventname = req.body.eventname;
@@ -81,10 +81,15 @@ app.post("/registernewtodowebhookevent", async (req, res, next) => {
     "NEWTODOADDED",
     endpointurl
   );
+  const webhookid = result.split("|")[1];
   console.log("result -> " + result);
+  result = result.split("|")[0];
+  const locationURL = `https://sqliteapi.onrender.com/deregisterwebhookevent?webhookid=${webhookid}`;
+  console.log(locationURL);
   if (result === "SUCCESS") {
     res
       .status(201)
+      .header("Location", locationURL)
       .send(JSON.parse('{"msg":"WebHook Event added succeeded!"}'));
   } else {
     res.status(500).send(JSON.parse('{"msg":"Some exception have occurred."}'));
@@ -92,7 +97,7 @@ app.post("/registernewtodowebhookevent", async (req, res, next) => {
   next();
 });
 
-//Register WebHook Events.
+//Register Update ToDo WebHook Events.
 app.post("/registerupdatetodowebhookevent", async (req, res, next) => {
   //console.log("Request Body -> " + req);
   //const eventname = req.body.eventname;
@@ -110,7 +115,7 @@ app.post("/registerupdatetodowebhookevent", async (req, res, next) => {
   next();
 });
 
-//Register WebHook Events.
+//Register Delete ToDo WebHook Events.
 app.post("/registerdeletetodowebhookevent", async (req, res, next) => {
   //console.log("Request Body -> " + req);
   //const eventname = req.body.eventname;
@@ -128,13 +133,14 @@ app.post("/registerdeletetodowebhookevent", async (req, res, next) => {
   next();
 });
 
-//Deregister WebHook Events.
-app.post("/deregisternewtodowebhookevent", async (req, res, next) => {
-  console.log("Request Body -> " + req.body);
+//Deregister New ToDo WebHook Events.
+app.post("/deregisterwebhookevent", async (req, res, next) => {
+  //console.log("Request Body -> " + req.body);
+  const webhookid = req.query.webhookid;
   //const eventname = req.body.eventname;
-  const endpointurl = req.body.endpointurl;
+  //const endpointurl = req.body.endpointurl;
   //console.log(loremvalue);
-  let result = await sqlite3dbapi.deleteWebHook(endpointurl);
+  let result = await sqlite3dbapi.deleteWebHook(webhookid);
   console.log("result -> " + result);
   if (result === "SUCCESS") {
     res
@@ -146,6 +152,7 @@ app.post("/deregisternewtodowebhookevent", async (req, res, next) => {
   next();
 });
 
+//List of all registered webhooks.
 app.get("/getwebhookevents", async function (req, res) {
   let webhookevents = await sqlite3dbapi.getAllWebHookDetails();
   webhookevents = "[" + webhookevents + "]";

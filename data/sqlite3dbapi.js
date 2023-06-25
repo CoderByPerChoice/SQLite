@@ -74,21 +74,30 @@ function sqlite3dbapi() {
     return new Promise(async (resolve, reject) => {
       try {
         const db = getDBRefObj();
+        let webhookid = "0";
         db.serialize(() => {
           try {
             const stmt = db.prepare("INSERT INTO WebHookDetails VALUES (?,?)");
             stmt.run(eventname, endpointurl);
             stmt.finalize();
 
+            // db.each(
+            //   "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails",
+            //   (err, row) => {
+            //     console.log(
+            //       row.id + ": " + row.eventname + ": " + row.endpointurl
+            //     );
+            //   }
+            // );
+
             db.each(
-              "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails",
+              "select max(rowid) as id from WebHookDetails",
               (err, row) => {
-                console.log(
-                  row.id + ": " + row.eventname + ": " + row.endpointurl
-                );
+                webhookid = row.id;
+                resolve(`SUCCESS|${webhookid}`);
               }
             );
-            resolve("SUCCESS");
+
             db.close();
           } catch (error) {
             reject(error);
@@ -100,15 +109,15 @@ function sqlite3dbapi() {
     });
   }
 
-  function deleteWebHook(endpointurl) {
+  function deleteWebHook(webhookid) {
     return new Promise(async (resolve, reject) => {
       try {
         const db = getDBRefObj();
         db.serialize(() => {
           const stmt = db.prepare(
-            "DELETE FROM WebHookDetails where endpointurl = (?)"
+            "DELETE FROM WebHookDetails where rowid = (?)"
           );
-          stmt.run([endpointurl]);
+          stmt.run([webhookid]);
           stmt.finalize();
 
           db.each(
