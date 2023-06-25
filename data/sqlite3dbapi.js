@@ -228,7 +228,17 @@ function sqlite3dbapi() {
     return new Promise(async (resolve, reject) => {
       try {
         const db = getDBRefObj();
+        let todovalue = "";
+
         db.serialize(() => {
+          db.each(
+            `select task from TODO where rowid = ${todoid}`,
+            (err, row) => {
+              todovalue = row.task;
+              console.log("ToDo deleted -> " + todovalue);
+            }
+          );
+
           const stmt = db.prepare("DELETE FROM TODO where rowid = (?)");
           stmt.run([todoid]);
           stmt.finalize();
@@ -237,7 +247,7 @@ function sqlite3dbapi() {
             "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails where eventname = 'TODODELETED'",
             async (err, row) => {
               try {
-                const body = { todoid: todoid };
+                const body = { todoid: todoid, todovalue: todovalue };
                 const response = await fetch(row.endpointurl, {
                   method: "POST",
                   body: JSON.stringify(body),
