@@ -21,16 +21,39 @@ function sqlite3dbapi() {
       try {
         const db = getDBRefObj();
         let todos = [];
+        let sql = `SELECT rowid AS id, task FROM TODO
+           ORDER BY rowid`;
 
-        db.serialize(() => {
-          db.each("SELECT rowid AS id, task FROM TODO", (err, row) => {
-            //todos.push(row.id + ": " + row.task);
-            let placeholder =
-              '{"id":"' + row.id + '","todo":"' + row.task + '"}';
-            todos.push(placeholder);
-            resolve(todos);
-          });
+        db.all(sql, [], (err, rows) => {
+          if (err) {
+            //throw err;
+            reject(err);
+          } else {
+            //Check if there are rows in the table.
+            if (rows.length > 0) {
+              //If the table is not empty.
+              rows.forEach((row) => {
+                //console.log(row.name);
+                let placeholder =
+                  '{"id":"' + row.id + '","todo":"' + row.task + '"}';
+                todos.push(placeholder);
+                resolve(todos);
+              });
+            } else {
+              //return empty array.
+              resolve(todos);
+            }
+          }
         });
+        // db.serialize(() => {
+        //   db.each("SELECT rowid AS id, task FROM TODO", (err, row) => {
+        //     //todos.push(row.id + ": " + row.task);
+        //     let placeholder =
+        //       '{"id":"' + row.id + '","todo":"' + row.task + '"}';
+        //     todos.push(placeholder);
+        //     resolve(todos);
+        //   });
+        // });
         db.close();
       } catch (error) {
         reject(error);
@@ -45,23 +68,50 @@ function sqlite3dbapi() {
         const db = getDBRefObj();
         let webhookdetails = [];
 
-        db.serialize(() => {
-          db.each(
-            "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails",
-            (err, row) => {
-              let placeholder =
-                '{"id":"' +
-                row.id +
-                '","eventname":"' +
-                row.eventname +
-                '","endpointurl":"' +
-                row.endpointurl +
-                '"}';
-              webhookdetails.push(placeholder);
+        let sql = `SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails`;
+
+        db.all(sql, [], (err, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            //Check if there are rows in the table.
+            if (rows.length > 0) {
+              //If the table is not empty.
+              rows.forEach((row) => {
+                let placeholder =
+                  '{"id":"' +
+                  row.id +
+                  '","eventname":"' +
+                  row.eventname +
+                  '","endpointurl":"' +
+                  row.endpointurl +
+                  '"}';
+                webhookdetails.push(placeholder);
+                resolve(webhookdetails);
+              });
+            } else {
+              //return empty array.
               resolve(webhookdetails);
             }
-          );
+          }
         });
+        // db.serialize(() => {
+        //   db.each(
+        //     "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails",
+        //     (err, row) => {
+        //       let placeholder =
+        //         '{"id":"' +
+        //         row.id +
+        //         '","eventname":"' +
+        //         row.eventname +
+        //         '","endpointurl":"' +
+        //         row.endpointurl +
+        //         '"}';
+        //       webhookdetails.push(placeholder);
+        //       resolve(webhookdetails);
+        //     }
+        //   );
+        // });
         db.close();
       } catch (error) {
         reject(error);
@@ -80,15 +130,6 @@ function sqlite3dbapi() {
             const stmt = db.prepare("INSERT INTO WebHookDetails VALUES (?,?)");
             stmt.run(eventname, endpointurl);
             stmt.finalize();
-
-            // db.each(
-            //   "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails",
-            //   (err, row) => {
-            //     console.log(
-            //       row.id + ": " + row.eventname + ": " + row.endpointurl
-            //     );
-            //   }
-            // );
 
             db.each(
               "select max(rowid) as id from WebHookDetails",
@@ -119,15 +160,6 @@ function sqlite3dbapi() {
           );
           stmt.run([webhookid]);
           stmt.finalize();
-
-          db.each(
-            "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails",
-            (err, row) => {
-              console.log(
-                row.id + ": " + row.eventname + ": " + row.endpointurl
-              );
-            }
-          );
           resolve("SUCCESS");
           db.close();
         });
@@ -144,9 +176,6 @@ function sqlite3dbapi() {
         const db = getDBRefObj();
         db.serialize(() => {
           db.run("CREATE TABLE TODO (task TEXT)");
-          db.each("SELECT rowid AS id, task FROM TODO", (err, row) => {
-            console.log(row.id + ": " + row.task);
-          });
           resolve("SUCCESS");
           db.close();
         });
@@ -163,12 +192,6 @@ function sqlite3dbapi() {
         const db = getDBRefObj();
         db.serialize(() => {
           db.run("CREATE TABLE WebHookDetails (eventname TEXT, endpointurl)");
-          db.each(
-            "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails",
-            (err, row) => {
-              console.log(row.id + ": " + row.task);
-            }
-          );
           resolve("SUCCESS");
           db.close();
         });
@@ -186,17 +209,12 @@ function sqlite3dbapi() {
           try {
             const stmt = db.prepare("INSERT INTO TODO VALUES (?)");
             stmt.run(todovalue);
-            stmt.finalize();
-
-            // db.each("SELECT rowid AS id, task FROM TODO", (err, row) => {
-            //   console.log(row.id + ": " + row.task);
-            // });
+            stmt.finalize((err) => {
+              reject(err);
+            });
             db.each(
               "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails where eventname = 'NEWTODOADDED'",
               async (err, row) => {
-                // console.log(
-                //   row.id + ": " + row.eventname + ": " + row.endpointurl
-                // );
                 try {
                   const body = { todovalue: todovalue };
                   const response = await fetch(row.endpointurl, {

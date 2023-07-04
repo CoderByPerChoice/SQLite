@@ -47,10 +47,14 @@ app.get("/", function (req, res) {
 });
 
 app.get("/gettodos", async function (req, res) {
-  let todos = await sqlite3dbapi.getAllTODOs();
-  //let content = await convertArrayToJson(todos);
-  todos = "[" + todos + "]";
-  res.status(200).send(JSON.parse(todos));
+  try {
+    let todos = await sqlite3dbapi.getAllTODOs();
+    //let content = await convertArrayToJson(todos);
+    todos = "[" + todos + "]";
+    res.status(200).send(JSON.parse(todos));
+  } catch (error) {
+    res.status(500).send("Exception have occurred -> " + error);
+  }
 });
 
 //Create ToDo table action.
@@ -164,9 +168,13 @@ app.delete("/deregisterwebhookevent", async (req, res, next) => {
 
 //List of all registered webhooks.
 app.get("/getwebhookevents", async function (req, res) {
-  let webhookevents = await sqlite3dbapi.getAllWebHookDetails();
-  webhookevents = "[" + webhookevents + "]";
-  res.status(200).send(JSON.parse(webhookevents));
+  try {
+    let webhookevents = await sqlite3dbapi.getAllWebHookDetails();
+    webhookevents = "[" + webhookevents + "]";
+    res.status(200).send(JSON.parse(webhookevents));
+  } catch (error) {
+    res.status(500).send("Exception have occurred -> " + error);
+  }
 });
 
 //Insert action.
