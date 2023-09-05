@@ -6,7 +6,7 @@ function sqlite3dbapi() {
   function getDBRefObj() {
     const databaseObj = new sqlite3.Database(
       "TODOs.db",
-      sqlite3.OPEN_READWRITE
+      sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE
     );
     // const databaseObj = new sqlite3.Database(
     //   ":memory:",
@@ -162,13 +162,13 @@ function sqlite3dbapi() {
   }
 
   //Create ToDo table.
-  function createToDotable() {
+  function createIfNotExistsToDotable() {
     return new Promise(async (resolve, reject) => {
       try {
         //const db = new sqlite3.Database("Employees.db");
         const db = getDBRefObj();
         db.serialize(() => {
-          db.run("CREATE TABLE TODO (task TEXT)", (err) => {
+          db.run("CREATE TABLE IF NOT EXISTS TODO (task TEXT)", (err) => {
             if (err) {
               reject(err);
             } else {
@@ -184,14 +184,14 @@ function sqlite3dbapi() {
   }
 
   //Create webhook table.
-  function createWebHookDetailsTable() {
+  function createIfNotExistsWebHookDetailsTable() {
     return new Promise(async (resolve, reject) => {
       try {
         //const db = new sqlite3.Database("Employees.db");
         const db = getDBRefObj();
         db.serialize(() => {
           db.run(
-            "CREATE TABLE WebHookDetails (eventname TEXT, endpointurl TEXT)",
+            "CREATE TABLE IF NOT EXISTS WebHookDetails (eventname TEXT, endpointurl TEXT)",
             (err) => {
               if (err) {
                 reject(err);
@@ -284,7 +284,7 @@ function sqlite3dbapi() {
                   (err) => {
                     if (err) reject(err);
                   }
-                ); //some comment
+                );
 
                 stmt.run([todoid]);
                 stmt.finalize((err) => {
@@ -381,7 +381,6 @@ function sqlite3dbapi() {
    * tags:
    *   name: ToDos
    *   description: The ToDos managing API
-   *
    * components:
    *   schemas:
    *     ToDos:
@@ -446,6 +445,13 @@ function sqlite3dbapi() {
    *           description: Operation response
    *       example:
    *         {"msg":"Operation succeeded!"}
+   *
+   *     Webhook:
+   *       required:
+   *        - endpointurl
+   *       properties:
+   *         endpointurl:
+   *           type: string
    * /gettodos:
    *   get:
    *     summary: Returns the list of all ToDos
@@ -510,12 +516,87 @@ function sqlite3dbapi() {
    *               $ref: '#/components/schemas/OperationResponse'
    *       500:
    *         description: Some server error
+   * /getwebhookevents:
+   *   summary: Gets all registered ToDo webhook events.
+   *   get:
+   *     summary: Gets all registered ToDo webhook events.
+   *     tags: [WebHooks]
+   *     responses:
+   *       "200":
+   *         description: Return a 200 status to indicate successful retrievel of registered webhooks.
+   *       "500":
+   *         description: Return a 500 status to indicate that an exception have occurred.
+   * /registernewtodowebhookevent:
+   *   summary: Registers new ToDo webhook.
+   *   post:
+   *     summary: Registers new ToDo webhook.
+   *     tags: [WebHooks]
+   *     requestBody:
+   *       description: Register webhook for new ToDo event.
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/Webhook'
+   *     responses:
+   *       "201":
+   *         description: Return a 201 status to indicate that webhook was registered successfully.
+   *       "500":
+   *         description: Return a 500 status to indicate that an exception have occurred.
+   * /registerupdatetodowebhookevent:
+   *   summary: Registers update ToDo webhook.
+   *   post:
+   *     summary: Registers update ToDo webhook.
+   *     tags: [WebHooks]
+   *     requestBody:
+   *       description: Register webhook for an update ToDo event.
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/Webhook'
+   *     responses:
+   *       "201":
+   *         description: Return a 201 status to indicate that webhook was registered successfully.
+   *       "500":
+   *         description: Return a 500 status to indicate that an exception have occurred.
+   * /registerdeletetodowebhookevent:
+   *   summary: Registers delete ToDo webhook.
+   *   post:
+   *     summary: Registers delete ToDo webhook.
+   *     tags: [WebHooks]
+   *     requestBody:
+   *       description: Register webhook for delete ToDo event.
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/Webhook'
+   *     responses:
+   *       "201":
+   *         description: Return a 201 status to indicate that webhook was registered successfully.
+   *       "500":
+   *         description: Return a 500 status to indicate that an exception have occurred.
+   * /deregisterwebhookevent?webhookid={webhookid}:
+   *   summary: Deregister's webhook.
+   *   delete:
+   *     summary: Deregister's webhook.
+   *     tags: [WebHooks]
+   *     parameters:
+   *       - in: path
+   *         name: webhookid
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: Weebhook id to deregister.
+   *     responses:
+   *       "201":
+   *         description: Return a 201 status to indicate that webhook was deregistered successfully.
+   *       "500":
+   *         description: Return a 500 status to indicate that an exception have occurred.
    */
 
   return {
     getAllTODOs,
-    createToDotable,
-    createWebHookDetailsTable,
+    createIfNotExistsToDotable,
+    createIfNotExistsWebHookDetailsTable,
     insertTODO,
     deleteTODO,
     updateTODO,
