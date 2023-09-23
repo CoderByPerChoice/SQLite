@@ -234,7 +234,7 @@ function sqlite3dbapi() {
               "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails where eventname = 'NEWTODOADDED'",
               async (err, row) => {
                 try {
-                  const body = { todovalue: todovalue };
+                  const body = { operation: "add", todovalue: todovalue };
                   const response = await fetch(row.endpointurl, {
                     method: "POST",
                     body: JSON.stringify(body),
@@ -300,7 +300,7 @@ function sqlite3dbapi() {
                   "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails where eventname = 'TODODELETED'",
                   async (err, row) => {
                     try {
-                      const body = { todoid: todoid, todovalue: todovalue };
+                      const body = { operation: "delete", todoid: todoid, todovalue: todovalue };
                       const response = await fetch(row.endpointurl, {
                         method: "POST",
                         body: JSON.stringify(body),
@@ -352,7 +352,7 @@ function sqlite3dbapi() {
             "SELECT rowid AS id, eventname, endpointurl FROM WebHookDetails where eventname = 'TODOUPDATED'",
             async (err, row) => {
               try {
-                const body = { todoid: todoid, todovalue: todovalue };
+                const body = { operation: "update", todoid: todoid, todovalue: todovalue };
                 const response = await fetch(row.endpointurl, {
                   method: "POST",
                   body: JSON.stringify(body),
