@@ -60,7 +60,7 @@ app.post("/addtodo", async (req, res, next) => {
 });
 
 //Delete action.
-app.post("/deletetodo", async (req, res, next) => {
+app.delete("/deletetodo", async (req, res, next) => {
   try {
     const todoid = req.body.todoid;
     if (todoid == undefined) throw new Error("ToDo ID cannot be blank");

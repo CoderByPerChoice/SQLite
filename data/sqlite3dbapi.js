@@ -498,7 +498,7 @@ function sqlite3dbapi() {
    *       500:
    *         description: Some server error
    * /deletetodo:
-   *   post:
+   *   delete:
    *     summary: Delete an existing ToDo
    *     tags: [ToDos]
    *     requestBody:
